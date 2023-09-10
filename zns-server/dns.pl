@@ -71,9 +71,7 @@ resource_record(N, RRs, E, NE) --> { var(N), length(RRs, N) }, resource_record(N
 domain(D, E, NE) --> { var(D)   , ! }, domain_v(D, E, NE), !.
 domain(D, E, NE) --> { ground(D), ! }, domain_g(D, E, NE), !.
 
-domain_v(D, E, NE) --> domain_v(D, init, E, NE).
-
-domain_v(D, init, E, NE) --> 
+domain_v(D, E, NE) --> 
     uint(2, N, E, NE),
     {
         Mask = 0xc000,
@@ -83,57 +81,38 @@ domain_v(D, init, E, NE) -->
         get_dict(Offset, E.domains, D)
     }, !.
 
-
-domain_v([], init, E, NE) --> uint(1, 0, E, NE).
-domain_v([SD | Ds], init, E, NE) -->
+domain_v([], E, NE) --> uint(1, 0, E, NE).
+domain_v([SD | Ds], E, NE) -->
     data(1, [N] , E , E2),
-    {
-        Mask = 0b11000000,
-        Flags is Mask /\ N,
-        Flags == 0b00000000
-    },
     data(N, Data, E2, E3),
-    domain_v(Ds, noinit, E3, E4),
+    domain_v(Ds, E3, E4),
     { 
         string_codes(SD, Data),
-        E = Env{offset: Offset, domains: Domains},
+        Offset = E.offset,
+        E4 = Env{offset: NOffset, domains: Domains},
         NDomains = Domains.put([Offset=[SD|Ds]]),
-        NOffset = E4.offset,
         NE = Env{offset: NOffset, domains: NDomains}
     }.
 
-domain_v([], noinit, E, NE) --> uint(1, 0, E, NE).
-domain_v([SD | Ds], noinit, E, NE) -->
-    data(1, [N] , E , E2),
-    data(N, Data, E2, E3),
-    domain_v(Ds, noinit, E3, NE),
-    { string_codes(SD, Data) }.
-
-domain_g(D, E, NE) --> domain_g(D, init, E, NE).
-
-domain_g([], init, E, NE) --> uint(1, 0, E, NE).
-domain_g(D, init, E, NE) -->
+domain_g(D, E, NE) -->
     {
         get_dict(Offset, E.domains, D),
         N is 0xc000 + Offset
     },
     uint(2, N, E, NE).
 
-domain_g(D, init, E, NE) -->
-    domain_g(D, noinit, E, E2),
-    {
-        E = Env{offset: Offset, domains: Domains},
-        NDomains = Domains.put([Offset=D]),
-        NOffset = E2.offset,
-        NE = Env{offset: NOffset, domains: NDomains}
-    }.
-
-domain_g([], noinit, E, NE) --> uint(1, 0, E, NE).
-domain_g([SD|Ds], noinit, E, NE) -->
+domain_g([], E, NE) --> uint(1, 0, E, NE).
+domain_g([SD | Ds], E, NE) -->
     { string_codes(SD, Codes), length(Codes, N) }, 
     uint(1, N, E, E2), 
     data(N, Codes, E2, E3), 
-    domain_g(Ds, init, E3, NE).
+    domain_g(Ds, E3, E4),
+    {
+        Offset = E.offset,
+        E4 = Env{offset: NOffset, domains: Domains},
+        NDomains = Domains.put([Offset=[SD|Ds]]),
+        NE = Env{offset: NOffset, domains: NDomains}
+    }.
 
 data(0, []    , E, E ) --> !.
 data(N, [C|Cs], E, NE) --> { ground(N), env_consume(1, E, E2) }, !, [C], { NM is N - 1 }, data(NM, Cs, E2, NE).
