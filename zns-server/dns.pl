@@ -9,10 +9,10 @@ dns(Dns) -->
     uint(2, NAnswers, E4, E5),
     uint(2, NAuthority, E5, E6),
     uint(2, NAditional, E6, E7),
-    questions(NQuestions, Qs, E7, E8),
-    resource_record(NAnswers, As, E8, E9),
-    resource_record(NAuthority, Auths, E9, E10),
-    resource_record(NAditional, Adds, E10, _),
+    questions(NQuestions, Qs, E7, E8), %{ write(Qs), nl } ,
+    resource_record(NAnswers, As, E8, E9), %{ write(As), nl } ,
+    resource_record(NAuthority, Auths, E9, E10), %{ write(Auths), nl } ,
+    resource_record(NAditional, Adds, E10, _), %{ write(Adds), nl } ,
     { Dns = dns(Identification, Header, Qs, As, Auths, Adds) }, !.
 
 dns(Dns) --> 
@@ -64,9 +64,18 @@ resource_record(N, [rr(D, Type, Class, TTL, RDLength, RData)|RRs], E, NE) -->
     uint(2, Class, E3, E4),
     uint(4, TTL, E4, E5),
     uint(2, RDLength, E5, E6),
-    data(RDLength, RData, E6, E7),
+    type(Type, RDLength, RData, E6, E7),
     { NM is N - 1 }, resource_record(NM, RRs, E7, NE).
 resource_record(N, RRs, E, NE) --> { var(N), length(RRs, N) }, resource_record(N, RRs, E, NE).
+
+% A Record
+type(1, _, ip(N1, N2, N3, N4), E, NE) --> { env_consume(4, E, NE) }, [N1, N2, N3, N4].
+
+% CNAME Record
+type(5, _, D, E, NE) --> domain(D, E, NE).
+
+% Any Other
+type(_, Bytes, Data, E, NE) --> data(Bytes, Data, E, NE).
 
 domain(D, E, NE) --> { var(D)   , ! }, domain_v(D, E, NE), !.
 domain(D, E, NE) --> { ground(D), ! }, domain_g(D, E, NE), !.
