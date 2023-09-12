@@ -16,7 +16,8 @@ run(Socket, JobQueue, NotifyQueue) :-
             write(Dns2), nl,
             udp_send(Socket, Response, From, [as(codes)]),
             From = Ip:_,
-            remote(NotifyQueue, Ip)
+            remote(NotifyQueue, Ip),
+            ansi_format([bold,fg('#00FF00')], 'ok~n', [])
             ;
             write(error), nl, write(Response), nl
         ),
