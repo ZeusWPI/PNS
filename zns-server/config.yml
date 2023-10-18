@@ -1,0 +1,8 @@
+server:
+  upstream_dns:
+    ip: 1.1.1.1
+    port: 53
+
+notifier:
+  ip: 127.0.0.1
+  port: 2000

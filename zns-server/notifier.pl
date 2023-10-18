@@ -9,7 +9,7 @@ run(Queue) :-
     repeat,
         thread_get_message(Queue, notify(Type, ip(N1, N2, N3, N4))),
         type(Type, Byte),
-        udp_send(Client, [Byte, N1, N2, N3, N4], ip(10,1,0,221):12512, [as(codes)]),
+        udp_send(Client, [Byte, N1, N2, N3, N4], ip(127,0,0,1):12512, [as(codes)]),
         ansi_format([bold,fg('#FF7F00')], 'sent~n', []),
         fail.
 
