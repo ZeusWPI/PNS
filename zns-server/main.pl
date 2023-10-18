@@ -4,17 +4,14 @@
 :- use_module('config').
 :- use_module('log').
 
-:- initialization(main).
-
 main() :-
-    current_prolog_flag(argv, [start]),
     print_info,
-
     read_config,
 
     repeat,
         udp_socket(Socket),
         tcp_bind(Socket, ip(127,0,0,1):53),
+        log_info('Accesible on IP: ~s PORT: ~d', ['127.0.0.1', 53]),
         message_queue_create(JobQueue, [max_size(1024)]),
         message_queue_create(NotifyQueue, [max_size(1024)]),
 
@@ -35,12 +32,16 @@ spawn_workers(N, Socket, JobQueue, NotifyQueue, [WorkerId | WorkerIds]) :-
 
 
 server(Socket, JobQueue) :-
+    log_debug('Ingress Worker ready to accept requests'),
     repeat,
         udp_receive(Socket, Data, From, [as(codes)]),
         thread_send_message(JobQueue, packet(From, Data)),
         fail.
 
 print_info :-
-    current_prolog_flag(version, Version),
-    log_info('==> ZNS - THE ZEUS (DOMAIN) NAME SYSTEM <=='),
-    log_info('~s', [Version]).
+    current_prolog_flag(version_data, swi(Ma, Mi, Pa, _)),
+    
+    log_info('╭────────────────────────────────────────────────╮'),
+    log_info('│ ZNS - THE ZEUS (DOMAIN) NAME (SYSTEM) SERVER   │'),
+    log_info('│ Running on SWI-Prolog: ~d.~d.~d                  │ ', [Ma, Mi, Pa]),
+    log_info('╰────────────────────────────────────────────────╯').

@@ -9,10 +9,10 @@ dns(Dns) -->
     uint(2, NAnswers, E4, E5),
     uint(2, NAuthority, E5, E6),
     uint(2, NAditional, E6, E7),
-    questions(NQuestions, Qs, E7, E8), %{ write(Qs), nl } ,
-    resource_record(NAnswers, As, E8, E9), %{ write(As), nl } ,
-    resource_record(NAuthority, Auths, E9, E10), %{ write(Auths), nl } ,
-    resource_record(NAditional, Adds, E10, _), %{ write(Adds), nl } ,
+    questions(NQuestions, Qs, E7, E8), 
+    resource_record(NAnswers, As, E8, E9), 
+    resource_record(NAuthority, Auths, E9, E10), 
+    resource_record(NAditional, Adds, E10, _), 
     { Dns = dns(Identification, Header, Qs, As, Auths, Adds) }, !.
 
 dns(Dns) --> 

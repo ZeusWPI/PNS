@@ -5,7 +5,7 @@
 :- dynamic config/2.
 
 read_config :-
-    log_debug('Loading config...'),
+    log_info('Loading config.yml'),
     catch(
         yaml_read('config.yml', DOM),
         Error,
@@ -13,7 +13,7 @@ read_config :-
     ),
     read_notifier(DOM),
     read_upstream_dns(DOM),
-    log_success('Loaded config'). 
+    log_debug('Loaded config!'). 
 
 read_notifier(DOM) :-
     (_{ip: SIp, port: Port} = DOM.notifier ->
