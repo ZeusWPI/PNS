@@ -132,7 +132,7 @@ domain_g(D) -->
     {
         env_domains(InitialState, Domains),
         get_dict(Offset, Domains, D),
-        N is 0xc000 + Offset
+        N is 0xc000 /\ Offset
     },
     uint(2, N).
 

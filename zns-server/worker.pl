@@ -12,6 +12,11 @@ run(Socket, JobQueue, NotifyQueue) :-
         % Catch any error a worker thread might encounter.
         % Print the error and resume with the next request.
         % TODO: Don't forget the request but proxy to upstream dns_server in hopes it can handle the request.
+
+        % Proxy using
+        % ?- udp_send(Client, Data, ip(1,1,1,1):53, [as(codes)]),
+        % ?- udp_receive(Client, Response, ip(1,1,1,1):53, [as(codes)]),
+        % ?- udp_send(Socket, Response, From, [as(codes)]),
         catch(
             run_(Socket, JobQueue, NotifyQueue, Client),
             Error,
@@ -25,7 +30,7 @@ run(Socket, JobQueue, NotifyQueue) :-
 run_(Socket, JobQueue, NotifyQueue, Client) :-
     repeat,
         thread_get_message(JobQueue, packet(From, Data)),
-        
+
         dns:dns(Dns, Data),
         log_debug('--> ~w', [Dns]),
         Dns = dns(_, _, [q(Domain, _, _)], _, _, _),
