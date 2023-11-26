@@ -1,5 +1,13 @@
 :- module('dns', []).
 
+state(S), [S] --> [S].       % Access the state.
+state(S, NS), [S] --> [NS].  % Access the state and modify.
+
+env(Env) --> state(S), { S = (_, Env) }.                            % Access the parsing evironment.
+env(Env, NEnv) --> state(S, NS), { S = (D, Env), NS = (D, NEnv) }.  % Access the parsing evironment and modify.
+
+byte(D) --> state(S, NS), { S = ([D|Ds], Env), NS = (Ds, Env) }.    % Take one byte from the input, TODO: UPDATE THE OFFSET
+
 dns(Dns) --> 
     { var(Dns) }, !,
     { E1 = env{offset: 0, domains: _{}} },
